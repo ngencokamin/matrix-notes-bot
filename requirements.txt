@@ -1,0 +1,4 @@
+simplematrixbotlib
+matrix-nio[e2e]
+python-dotenv
+sqlitedict

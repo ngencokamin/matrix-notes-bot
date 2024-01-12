@@ -1,0 +1,5 @@
+.env
+store/
+session.txt
+db/*.sqlite
+__pycache__
