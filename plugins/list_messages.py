@@ -1,11 +1,9 @@
 from sqlitedict import SqliteDict
 
-def get_from_db():
+def get_from_db(room_id):
     db = SqliteDict("db/db.sqlite")
-    messages = db['messages']
+    if not db or not db[room_id]:
+        return False
+    messages = db[room_id]
     db.close()
     return messages
-
-def format_messages(messages):
-    for item in messages:
-        print(item, ' -> ', messages[item])
