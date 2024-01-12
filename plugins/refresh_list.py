@@ -2,8 +2,8 @@ from sqlitedict import SqliteDict
 
 def refresh():
     db = SqliteDict("db/db.sqlite")
-    commands = []
-    for command in db['messages']:
-        commands.append(command)
+    rooms = {}
+    for room in db:
+        rooms[room] = db[room]
     db.close()
-    return commands
+    return rooms

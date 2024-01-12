@@ -1,6 +1,6 @@
 from sqlitedict import SqliteDict
 
-def get_by_command(command):
+def get_by_command(command, room_id):
     db = SqliteDict("db/db.sqlite")
-    messages = db['messages']
+    messages = db[room_id]
     return messages[command]
