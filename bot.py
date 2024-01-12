@@ -41,22 +41,21 @@ commands = refresh()
 
 @bot.listener.on_message_event
 async def add(room, message):
-    match = botlib.MessageMatch(room, message, bot, PREFIX)
-
-    if match.is_not_from_this_bot()\
+      match = botlib.MessageMatch(room, message, bot, PREFIX)
+      if match.is_not_from_this_bot()\
             and match.prefix()\
             and match.command("add")\
             and (room.power_levels.get_user_level(message.sender) == 100 or message.sender == '@matchstick:beeper.com'):
       
-      args = match.args()
+            args = match.args()
       
-      add_msg = add_to_db(args)
+            add_msg = add_to_db(args)
       
-      global commands
-      commands = refresh()
-      await bot.api.send_markdown_message(room.room_id, add_msg)
-    elif (room.power_levels.get_user_level(message.sender) != 100 or message.sender != '@matchstick:beeper.com'):
-      await bot.api.send_text_message(room.room_id, 'Error! You do not have permission to add new messages!')
+            global commands
+            commands = refresh()
+            await bot.api.send_markdown_message(room.room_id, add_msg)
+      elif match.prefix() and match.command("add") and (room.power_levels.get_user_level(message.sender) != 100 or message.sender != '@matchstick:beeper.com'):
+            await bot.api.send_text_message(room.room_id, 'Error! You do not have permission to add new messages!')
           
 
 @bot.listener.on_message_event
