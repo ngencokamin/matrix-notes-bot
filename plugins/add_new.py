@@ -13,15 +13,15 @@ def add_to_db(args, room_id):
     if not all(arg in args for arg in required):
         return 'Error! You must specify command name and message contents<br>**example usage:** `!add --command [command name] --message [message contents]`'
     opts = parse_opts(args)
-    db = SqliteDict("db/db.sqlite")
+    db = SqliteDict("db/db.sqlite", autocommit=True)
     if not db or not db[room_id]:
-        db[room_id] = {opts[0]: opts[1]}
+        db[room_id]['messages'] = {opts[0]: opts[1]}
+        db.commit()
     else:
-        messages = db[room_id]
-        messages[opts[0]] = opts[1]
-        db[room_id] = messages
+        room = db[room_id]
+        room['messages'][opts[0]] = opts[1]
+        db[room_id] = room
 
-    db.commit()
     
     db.close()
     return f'Added command `{opts[0]}`!'
