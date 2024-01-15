@@ -1,0 +1,24 @@
+**Matrix Notes Bot**
+<small> A simple bot to send notes on a given command</small>
+
+**Notes**
+Add new note (requires admin permissions or being on allowlist):
+```
+!add --command <note trigger> --message <message to output on command>
+```
+List room's notes:
+```
+!list
+```
+&nbsp;
+**Permissions:**
+*All commands in this section require admin permissions or being on allowlist*
+Add user to allowlist:
+```
+add_user @<tag user here>
+# Note: You *must* tag the user you want to add
+```
+Remove user from allowlist:
+```
+!remove_user @<tag user here>
+```

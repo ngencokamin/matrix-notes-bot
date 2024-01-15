@@ -1,7 +1,7 @@
 from dotenv import dotenv_values
 import simplematrixbotlib as botlib
 from sqlitedict import SqliteDict
-from plugins.add_new import add_to_db
+from plugins.handle_notes import add_to_db
 from plugins.refresh import refresh, verify_and_add_rooms, add_invited_room
 from plugins.run_command import get_by_command
 from plugins.perms import has_permissions, add_user, remove_user
@@ -47,7 +47,20 @@ bot = botlib.Bot(creds, config)
 PREFIX = '!'
 
 rooms = refresh()
-commands = ['add', 'remove', 'edit', 'add_user', 'echo', 'list', 'sync']
+commands = ['add', 'remove', 'add_user', 'list', 'sync', 'help']
+
+
+@bot.listener.on_message_event
+async def help(room, message):
+      match = botlib.MessageMatch(room, message, bot, PREFIX)
+      
+      if match.is_not_from_this_bot()\
+            and match.prefix()\
+            and match.command("help"):
+            
+            test = open('resources/help_text.txt', 'r')
+            await bot.api.send_markdown_message(room.room_id, test.read())
+            
 
 @bot.listener.on_message_event
 async def add(room, message):
