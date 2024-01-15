@@ -6,6 +6,10 @@ Add new note (requires admin permissions or being on allowlist):
 ```
 !add --command <note trigger> --message <message to output on command>
 ```
+Remove existing note (requires admin permissions or being on allowlist):
+```
+!remove --command <note trigger>
+```
 List room's notes:
 ```
 !list
@@ -15,7 +19,7 @@ List room's notes:
 *All commands in this section require admin permissions or being on allowlist*
 Add user to allowlist:
 ```
-add_user @<tag user here>
+!add_user @<tag user here>
 # Note: You *must* tag the user you want to add
 ```
 Remove user from allowlist:
