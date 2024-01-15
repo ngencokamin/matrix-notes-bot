@@ -1,7 +1,7 @@
 from dotenv import dotenv_values
 import simplematrixbotlib as botlib
 from sqlitedict import SqliteDict
-from plugins.add_new import add_to_db
+from plugins.handle_notes import add_to_db, remove_from_db
 from plugins.refresh import refresh, verify_and_add_rooms, add_invited_room
 from plugins.run_command import get_by_command
 from plugins.perms import has_permissions, add_user, remove_user
@@ -16,17 +16,24 @@ config = dotenv_values(".env")
 homeserver = config['HOMESERVER']
 user = config['USER']
 password = config['PASS']
+
+
 """
 Example Usage:
 
-random_user
-      *emoji verification or one-sided verification
+Add command with message:
+!add --command <command here> --message <message to output on command>
 
-random_user
-      !echo something
+Add user to allowlist for adding new commands and adding to allowlist (requires power level 100 or being on allowlist): 
+!add_user @<tag user here>
+Note: You *must* tag the user you want to add
 
-echo_bot
-      something
+Remove user from allowlist for adding new commands and removing from allowlist (requires power level 100 or being on allowlist):
+!remove_user @<tag user here>
+
+List all commands in DB for current room: 
+!list
+
 """
 
 
@@ -40,7 +47,20 @@ bot = botlib.Bot(creds, config)
 PREFIX = '!'
 
 rooms = refresh()
-commands = ['add', 'remove', 'edit', 'add_user', 'echo', 'list', 'sync']
+commands = ['add', 'remove', 'add_user', 'list', 'sync', 'help']
+
+
+@bot.listener.on_message_event
+async def help(room, message):
+      match = botlib.MessageMatch(room, message, bot, PREFIX)
+      
+      if match.is_not_from_this_bot()\
+            and match.prefix()\
+            and match.command("help"):
+            
+            test = open('resources/help_text.txt', 'r')
+            await bot.api.send_markdown_message(room.room_id, test.read())
+            
 
 @bot.listener.on_message_event
 async def add(room, message):
@@ -51,9 +71,7 @@ async def add(room, message):
             and match.prefix()\
             and match.command("add")\
             and has_permissions(room, message, rooms):
-            # and (room.power_levels.get_user_level(message.sender) == 100 or message.sender == '@matchstick:beeper.com'):
       
-            args = match.args()
             body = message.body
       
             add_msg = add_to_db(body, room.room_id)
@@ -62,7 +80,31 @@ async def add(room, message):
             await bot.api.send_markdown_message(room.room_id, add_msg)
       elif match.prefix()\
             and match.command("add"):
-            await bot.api.send_text_message(room.room_id, 'Error! You do not have permission to add new messages!')
+            await bot.api.send_text_message(room.room_id, 'Error! You do not have permission to add notes!')
+            
+@bot.listener.on_message_event
+async def remove(room, message):
+      match = botlib.MessageMatch(room, message, bot, PREFIX)
+      
+      global rooms
+      if match.is_not_from_this_bot()\
+            and match.prefix()\
+            and match.command("remove")\
+            and has_permissions(room, message, rooms):
+      
+            args = match.args()
+
+            if len(args) != 1:
+                  await bot.api.send_markdown_message(room.room_id, 'Error! Please input a valid command to remove! Check `!help` for usage examples')
+            elif not args[0] in rooms[room.room_id]['messages']:
+                  await bot.api.send_markdown_message(room.room_id, f'Error! Command `{args[0]}` not found')
+            else:
+                  remove_msg = remove_from_db(args[0], room.room_id)
+                  rooms = refresh()
+                  await bot.api.send_markdown_message(room.room_id, remove_msg)
+      elif match.prefix()\
+            and match.command("remove"):
+            await bot.api.send_markdown_message(room.room_id, 'Error! You do not have permission to remove notes!')
           
 
 @bot.listener.on_message_event
@@ -73,7 +115,7 @@ async def list(room, message):
             and match.command("list"):
             
             if not rooms or not rooms[room.room_id]:
-                  await bot.api.send_text_message(room.room_id, 'Error! No saved messages found!')
+                  await bot.api.send_text_message(room.room_id, 'Error! No saved notes found!')
             else:
                   await bot.api.send_markdown_message(room.room_id, "\n".join('- ' + str(item) for item in rooms[room.room_id]['messages']))
 
