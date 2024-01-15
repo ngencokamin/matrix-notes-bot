@@ -16,17 +16,24 @@ config = dotenv_values(".env")
 homeserver = config['HOMESERVER']
 user = config['USER']
 password = config['PASS']
+
+
 """
 Example Usage:
 
-random_user
-      *emoji verification or one-sided verification
+Add command with message:
+!add --command <command here> --message <message to output on command>
 
-random_user
-      !echo something
+Add user to allowlist for adding new commands and adding to allowlist (requires power level 100 or being on allowlist): 
+!add_user @<tag user here>
+Note: You *must* tag the user you want to add
 
-echo_bot
-      something
+Remove user from allowlist for adding new commands and removing from allowlist (requires power level 100 or being on allowlist):
+!remove_user @<tag user here>
+
+List all commands in DB for current room: 
+!list
+
 """
 
 
