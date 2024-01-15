@@ -1,18 +1,21 @@
 from sqlitedict import SqliteDict
 
-def parse_opts(arr):
+def parse_opts(message_body):
     
-    message = []
+    start_command = message_body.find('--command ') + 10
+    end_command = message_body.find(' --message')
+    command = message_body[start_command:end_command]
     
-    command = "".join(arr[arr.index('--command')+1:arr.index('--message')])
-    message = " ".join(arr[arr.index('--message')+1:len(arr)])
+    start_message = message_body.find('--message ') + 10
+    message = message_body[start_message:]
+    
     return [command, message]
 
-def add_to_db(args, room_id):
+def add_to_db(body, room_id):
     required = ["--command", "--message"]
-    if not all(arg in args for arg in required):
+    if not all(arg in body for arg in required):
         return 'Error! You must specify command name and message contents<br>**example usage:** `!add --command [command name] --message [message contents]`'
-    opts = parse_opts(args)
+    opts = parse_opts(body)
     db = SqliteDict("db/db.sqlite", autocommit=True)
     if not db or not db[room_id]:
         db[room_id]['messages'] = {opts[0]: opts[1]}

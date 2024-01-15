@@ -2,7 +2,6 @@ from dotenv import dotenv_values
 import simplematrixbotlib as botlib
 from sqlitedict import SqliteDict
 from plugins.add_new import add_to_db
-from plugins.list_messages import get_from_db
 from plugins.refresh import refresh, verify_and_add_rooms, add_invited_room
 from plugins.run_command import get_by_command
 from plugins.perms import has_permissions, add_user, remove_user
@@ -55,8 +54,9 @@ async def add(room, message):
             # and (room.power_levels.get_user_level(message.sender) == 100 or message.sender == '@matchstick:beeper.com'):
       
             args = match.args()
+            body = message.body
       
-            add_msg = add_to_db(args, room.room_id)
+            add_msg = add_to_db(body, room.room_id)
       
             rooms = refresh()
             await bot.api.send_markdown_message(room.room_id, add_msg)
@@ -75,7 +75,7 @@ async def list(room, message):
             if not rooms or not rooms[room.room_id]:
                   await bot.api.send_text_message(room.room_id, 'Error! No saved messages found!')
             else:
-                  await bot.api.send_markdown_message(room.room_id, "\n".join('- ' + str(item) for item in rooms[room.room_id]))
+                  await bot.api.send_markdown_message(room.room_id, "\n".join('- ' + str(item) for item in rooms[room.room_id]['messages']))
 
 @bot.listener.on_message_event
 async def send_command(room, message):
@@ -109,11 +109,15 @@ async def sync_db(room, message):
 @bot.listener.on_message_event
 async def add_allowed_user(room, message):
       match = botlib.MessageMatch(room, message, bot, PREFIX)
+      
+      
+      global rooms
       if match.is_not_from_this_bot()\
       and match.prefix()\
       and match.command("add_user")\
       and has_permissions(room, message, rooms):
             response = add_user(message.formatted_body, room.room_id)
+            rooms = refresh()
             await bot.api.send_text_message(room.room_id, response)
       elif match.is_not_from_this_bot()\
       and match.prefix()\
@@ -123,11 +127,14 @@ async def add_allowed_user(room, message):
 @bot.listener.on_message_event
 async def remove_allowed_user(room, message):
       match = botlib.MessageMatch(room, message, bot, PREFIX)
+      
+      global rooms
       if match.is_not_from_this_bot()\
       and match.prefix()\
       and match.command("remove_user")\
       and has_permissions(room, message, rooms):
             response = remove_user(message.formatted_body, room.room_id)
+            rooms = refresh()
             await bot.api.send_text_message(room.room_id, response)
       elif match.is_not_from_this_bot()\
       and match.prefix()\
