@@ -114,10 +114,10 @@ async def list(room, message):
             and match.prefix()\
             and match.command("list"):
             
-            if not rooms or not rooms[room.room_id]:
-                  await bot.api.send_text_message(room.room_id, 'Error! No saved notes found!')
+            if len(rooms[room.room_id]['messages']) == 0:
+                  await bot.api.send_markdown_message(room.room_id, 'No saved notes found!')
             else:
-                  await bot.api.send_markdown_message(room.room_id, "\n".join('- ' + str(item) for item in rooms[room.room_id]['messages']))
+                  await bot.api.send_markdown_message(room.room_id, '**Saved Notes** \n' + "\n".join('- ' + str(item) for item in rooms[room.room_id]['messages']))
 
 @bot.listener.on_message_event
 async def send_command(room, message):
