@@ -185,7 +185,7 @@ async def remove_allowed_user(room, message):
             
 @bot.listener.on_custom_event(nio.InviteEvent)
 async def test_event(room, event):
-      if event.state_key == bot.async_client.user_id\
+      if event.source['state_key'] == bot.async_client.user_id\
             and event.content['membership'] == 'invite'\
             and not event.prev_content:
                   add_invited_room(room.room_id)
